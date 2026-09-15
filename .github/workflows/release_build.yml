@@ -2,9 +2,8 @@ name: Release Build
 
 on:
   push:
-    branches:
-      - master
-  workflow_dispatch:
+    tags:
+      - "v*.*.*"
 
 jobs:
   build_release_apk:
