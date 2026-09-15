@@ -315,6 +315,7 @@
 
 [3.0.7]: https://github.com/privacyidea/pi-authenticator/compare/v3.0.6...v3.0.7
 
+
 [3.0.6]: https://github.com/privacyidea/pi-authenticator/compare/v3.0.4...v3.0.6
 
 [3.0.4]: https://github.com/privacyidea/pi-authenticator/compare/v3.0.0...v3.0.4
