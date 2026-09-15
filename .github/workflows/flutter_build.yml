@@ -4,7 +4,6 @@ on:
     branches:
       - master
   pull_request:
-
 jobs:
   build_ios:
     name: (iOS)
@@ -12,63 +11,50 @@ jobs:
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
-
       - name: Set Xcode version
         uses: maxim-lobanov/setup-xcode@v1
         with:
           xcode-version: "26.6.0"
-
       - uses: actions/setup-java@v4
         with:
           distribution: "zulu"
           java-version: "21"
-
       - uses: subosito/flutter-action@v2
         with:
           channel: "stable"
           flutter-version: "3.44.0"
-
       - run: flutter clean
       - run: flutter --version
       - run: flutter doctor -v
       - run: flutter pub get
       - run: flutter gen-l10n
       - run: flutter build ios -t "lib/mains/main_netknights.dart" --debug --flavor netknights --no-codesign
-
   build_appbundle:
     name: (Android)
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
-
       - name: Set up Java Development Kit
         uses: actions/setup-java@v4
         with:
           distribution: "zulu"
           java-version: "21"
-
       - name: Set up Flutter SDK
         uses: subosito/flutter-action@v2
         with:
           channel: "stable"
           flutter-version: "3.44.0"
-
       - name: Clean Flutter project
         run: flutter clean
-
       - name: Display Flutter version
         run: flutter --version
-
       - name: Run Flutter Doctor
         run: flutter doctor -v
-
       - name: Get Flutter dependencies
         run: flutter pub get
-
       - name: Generate localization files
         run: flutter gen-l10n
-
       - name: Cache Gradle dependencies
         uses: actions/cache@v4
         with:
@@ -78,6 +64,10 @@ jobs:
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
           restore-keys: |
             ${{ runner.os }}-gradle-
-
       - name: Build Android APK (Debug)
         run: flutter build apk -t "lib/mains/main_netknights.dart" --debug --flavor netknights
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: pi-authenticator-apk
+          path: build/app/outputs/flutter-apk/*.apk
