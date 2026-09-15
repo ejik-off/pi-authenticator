@@ -84,9 +84,6 @@ class AppLockService with WidgetsBindingObserver {
     try {
       final ok = await _auth.authenticate(
         localizedReason: 'Разблокируйте privacyIDEA Authenticator',
-        biometricOnly: true,
-        stickyAuth: true,
-        useErrorDialogs: true,
       );
       if (ok) {
         _unlocked = true;
