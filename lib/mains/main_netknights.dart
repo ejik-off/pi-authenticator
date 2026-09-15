@@ -28,6 +28,7 @@ import 'package:privacyidea_authenticator/utils/riverpod/riverpod_providers/gene
 
 import '../../../../model/riverpod_states/settings_state.dart';
 import '../l10n/app_localizations.dart';
+import '../utils/app_lock.dart'; // <-- ДОБАВЛЕНО: наш экран блокировки
 import '../utils/customization/application_customization.dart';
 import '../utils/globals.dart';
 import '../utils/logger.dart';
@@ -45,10 +46,13 @@ void main() async {
       appFirebaseOptions = DefaultFirebaseOptions.currentPlatformOf(
         'netknights',
       );
+      AppLockService.instance.init(); // <-- ДОБАВЛЕНО: включаем блокировку
       runApp(
         AppWrapper(
-          child: PrivacyIDEAAuthenticator(
-            ApplicationCustomization.defaultCustomization,
+          child: AppLockGate( // <-- ДОБАВЛЕНО: оборачиваем приложение
+            child: PrivacyIDEAAuthenticator(
+              ApplicationCustomization.defaultCustomization,
+            ),
           ),
         ),
       );
