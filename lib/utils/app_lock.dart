@@ -84,7 +84,7 @@ class AppLockService with WidgetsBindingObserver {
     try {
       final ok = await _auth.authenticate(
         localizedReason: 'Разблокируйте privacyIDEA Authenticator',
-        options: const AuthenticationOptions(
+        options: AuthenticationOptions(
           biometricOnly: true,
           stickyAuth: true,
           useErrorDialogs: true,
