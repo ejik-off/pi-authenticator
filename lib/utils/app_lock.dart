@@ -1,20 +1,26 @@
-// lib/utils/app_lock.dart
-import 'package:flutter/foundation.dart';
-import 'package:flutter/widgets.dart';
+/*
+  App Lock для privacyIDEA Authenticator (форк)
+
+  Требует биометрию при каждом запуске приложения и при возврате
+  из фона (если прошло больше relockAfter секунд).
+
+  Licensed under the Apache License, Version 2.0
+*/
+
+import 'package:flutter/material.dart';
 import 'package:local_auth/local_auth.dart';
 
-/// Требует биометрию при каждом запуске приложения и при возврате
-/// из фона (если прошло больше relockAfter секунд).
 class AppLockService with WidgetsBindingObserver {
   AppLockService._();
   static final AppLockService instance = AppLockService._();
 
   final LocalAuthentication _auth = LocalAuthentication();
 
-  /// Поставьте false, если захотите временно отключить блокировку.
+  /// Блокировка включена. Автоматически отключается,
+  /// если на устройстве не настроена биометрия (защита от полной блокировки).
   bool enabled = true;
 
-  /// Через сколько секунд после сворачивания снова спрашивать биометрию.
+  /// Через сколько секунд после сворачивания снова запрашивать биометрию.
   Duration relockAfter = const Duration(seconds: 15);
 
   bool _unlocked = false;
@@ -25,11 +31,31 @@ class AppLockService with WidgetsBindingObserver {
 
   void init() {
     WidgetsBinding.instance.addObserver(this);
+    _checkBiometricsAvailability();
   }
 
-  /// Подписка для виджета-обёртки, чтобы перерисовываться.
+  Future<void> _checkBiometricsAvailability() async {
+    try {
+      final biometrics = await _auth.getAvailableBiometrics();
+      if (biometrics.isEmpty) {
+        // На устройстве нет биометрии — не блокируем,
+        // иначе пользователь не сможет войти в приложение.
+        enabled = false;
+        _notify();
+      }
+    } catch (_) {
+      // Не удалось проверить — оставляем блокировку включённой.
+    }
+  }
+
   void addListener(VoidCallback cb) => _onStateChanged = cb;
+
   void removeListener() => _onStateChanged = null;
+
+  void _notify() {
+    final cb = _onStateChanged;
+    if (cb != null) cb();
+  }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
@@ -54,11 +80,6 @@ class AppLockService with WidgetsBindingObserver {
     }
   }
 
-  void _notify() {
-    final cb = _onStateChanged;
-    if (cb != null) cb();
-  }
-
   Future<bool> authenticate() async {
     try {
       final ok = await _auth.authenticate(
@@ -80,9 +101,11 @@ class AppLockService with WidgetsBindingObserver {
   }
 }
 
-/// Обёртка-виджет: пока isLocked == true, показывает LockScreen.
+/// Обёртка: пока приложение заблокировано, показывает экран блокировки
+/// вместо основного интерфейса.
 class AppLockGate extends StatefulWidget {
   const AppLockGate({required this.child, super.key});
+
   final Widget child;
 
   @override
@@ -94,7 +117,7 @@ class _AppLockGateState extends State<AppLockGate> {
   void initState() {
     super.initState();
     AppLockService.instance.addListener(_rebuild);
-    // Первая разблокировка при старте приложения:
+    // Запрашиваем биометрию сразу при старте приложения:
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (AppLockService.instance.isLocked) {
         AppLockService.instance.authenticate();
@@ -115,19 +138,24 @@ class _AppLockGateState extends State<AppLockGate> {
   @override
   Widget build(BuildContext context) {
     if (!AppLockService.instance.isLocked) return widget.child;
-    return Directionality(
-      textDirection: TextDirection.ltr,
-      child: Material(
-        color: const Color(0xFF121212),
+    return Material(
+      color: const Color(0xFF121212),
+      child: Directionality(
+        textDirection: TextDirection.ltr,
         child: Center(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.lock_outline,
-                  size: 64, color: Color(0xFF4FC3F7)),
+              const Icon(
+                Icons.lock_outline,
+                size: 64,
+                color: Color(0xFF4FC3F7),
+              ),
               const SizedBox(height: 24),
-              const Text('Приложение заблокировано',
-                  style: TextStyle(color: Colors.white70, fontSize: 16)),
+              const Text(
+                'Приложение заблокировано',
+                style: TextStyle(color: Colors.white70, fontSize: 16),
+              ),
               const SizedBox(height: 24),
               ElevatedButton.icon(
                 onPressed: () => AppLockService.instance.authenticate(),
