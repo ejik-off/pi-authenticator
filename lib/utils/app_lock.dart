@@ -83,7 +83,7 @@ class AppLockService with WidgetsBindingObserver {
   Future<bool> authenticate() async {
     try {
       final ok = await _auth.authenticate(
-        localizedReason: 'Разблокируйте privacyIDEA Authenticator',
+        localizedReason: 'Разблокируйте для входа в приложение',
       );
       if (ok) {
         _unlocked = true;
