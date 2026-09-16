@@ -94,13 +94,13 @@ android {
         netknights{
             dimension "pi-authenticator"
             applicationId "it.netknights.piauthenticator"
-            resValue "string", "app_name", "privacyIDEA Authenticator"
+            resValue "string", "app_name", "EurasianBank Authenticator"
             signingConfig signingConfigs.netknights
         }
         netknights_debug{
             dimension "pi-authenticator"
             applicationId "it.netknights.piauthenticator.debug"
-            resValue "string", "app_name", "Internal - privacyIDEA Authenticator"
+            resValue "string", "app_name", "Internal - EurasianBank Authenticator"
             signingConfig signingConfigs.netknights_debug
         }
     }
