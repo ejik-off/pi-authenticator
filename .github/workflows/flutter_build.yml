@@ -53,6 +53,8 @@ jobs:
         run: flutter doctor -v
       - name: Get Flutter dependencies
         run: flutter pub get
+      - name: Generate launcher icons
+        run: dart run flutter_launcher_icons -f flutter_launcher_icons-netknights.yaml
       - name: Generate localization files
         run: flutter gen-l10n
       - name: Cache Gradle dependencies
