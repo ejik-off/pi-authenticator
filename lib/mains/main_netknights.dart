@@ -91,6 +91,7 @@ class PrivacyIDEAAuthenticator extends ConsumerWidget {
           ref.read(appConstraintsProvider.notifier).update(constraints);
         });
         return MaterialApp(
+          debugShowCheckedModeBanner: false,
           scrollBehavior: ScrollConfiguration.of(
             context,
           ).copyWith(physics: const ClampingScrollPhysics(), overscroll: false),
