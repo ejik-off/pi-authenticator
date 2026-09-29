@@ -16,6 +16,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * FORK MODIFICATION: push requests always require authentication,
+ * regardless of token lock state. This cannot be disabled.
  */
 
 import 'dart:math' show min;
@@ -91,16 +94,16 @@ mixin PushDialogMixin {
     String? answer,
     Future<bool> Function(PiSuccessResponse<V, D>, WidgetRef ref)? onSuccess,
   }) async {
-    if (token.isLocked) {
-      final authenticated = await lockAuthWithSettings(
-        ref: ref,
-        reason: (l10n) => l10n.authToAcceptPushRequest,
-        localization: AppLocalizations.of(context)!,
-        forceBiometricOption: token.forceBiometricOption,
-      );
-      if (!context.mounted || !ref.context.mounted || !authenticated) {
-        return;
-      }
+    // FORK: authentication is always required before accepting a push
+    // request, not only for locked tokens.
+    final authenticated = await lockAuthWithSettings(
+      ref: ref,
+      reason: (l10n) => l10n.authToAcceptPushRequest,
+      localization: AppLocalizations.of(context)!,
+      forceBiometricOption: token.forceBiometricOption,
+    );
+    if (!context.mounted || !ref.context.mounted || !authenticated) {
+      return;
     }
 
     final PiSuccessResponse<V, D>? response;
@@ -132,16 +135,16 @@ mixin PushDialogMixin {
   }
 
   Future<void> handleDecline(BuildContext context, WidgetRef ref) async {
-    if (token.isLocked) {
-      final authenticated = await lockAuthWithSettings(
-        ref: ref,
-        reason: (l10n) => l10n.authToDeclinePushRequest,
-        localization: AppLocalizations.of(context)!,
-        forceBiometricOption: token.forceBiometricOption,
-      );
-      if (!context.mounted || !ref.context.mounted || !authenticated) {
-        return;
-      }
+    // FORK: authentication is always required before declining a push
+    // request, not only for locked tokens.
+    final authenticated = await lockAuthWithSettings(
+      ref: ref,
+      reason: (l10n) => l10n.authToDeclinePushRequest,
+      localization: AppLocalizations.of(context)!,
+      forceBiometricOption: token.forceBiometricOption,
+    );
+    if (!context.mounted || !ref.context.mounted || !authenticated) {
+      return;
     }
     final response = await ref
         .read(pushRequestProvider.notifier)
