@@ -67,7 +67,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
       - name: Build Android APK (Debug)
-        run: flutter build apk -t "lib/mains/main_netknights.dart" --debug --flavor netknights
+        run: flutter build apk -t "lib/mains/main_netknights.dart" --debug --flavor netknights --target-platform android-arm64
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
