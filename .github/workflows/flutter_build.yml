@@ -32,7 +32,7 @@ jobs:
   build_appbundle:
     name: (Android)
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - name: Set up Java Development Kit
@@ -51,10 +51,26 @@ jobs:
         run: flutter --version
       - name: Run Flutter Doctor
         run: flutter doctor -v
+      - name: Check signing secrets are set
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+        run: |
+          if [ -z "$KEYSTORE_BASE64" ] || [ -z "$KEYSTORE_PASSWORD" ]; then
+            echo "::error::Не заданы секреты KEYSTORE_BASE64 и/или KEYSTORE_PASSWORD."
+            echo "::error::Сначала выполните генерацию ключа (workflow Generate Keystore)."
+            exit 1
+          fi
+      - name: Restore signing keystore
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+        run: |
+          mkdir -p android/app/src/netknights
+          echo "$KEYSTORE_BASE64" | base64 -d > android/app/src/netknights/netknights.jks
+          printf 'storeFile=src/netknights/netknights.jks\nstorePassword=%s\nkeyAlias=pi_auth\nkeyPassword=%s\n' "$KEYSTORE_PASSWORD" "$KEYSTORE_PASSWORD" > android/app/src/netknights/key.properties
       - name: Get Flutter dependencies
         run: flutter pub get
-      - name: Generate launcher icons
-        run: dart run flutter_launcher_icons -f flutter_launcher_icons-netknights.yaml
       - name: Generate localization files
         run: flutter gen-l10n
       - name: Cache Gradle dependencies
@@ -66,8 +82,8 @@ jobs:
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
           restore-keys: |
             ${{ runner.os }}-gradle-
-      - name: Build Android APK (Debug)
-        run: flutter build apk -t "lib/mains/main_netknights.dart" --debug --flavor netknights --target-platform android-arm64
+      - name: Build Android APK (Release)
+        run: flutter build apk -t "lib/mains/main_netknights.dart" --release --flavor netknights --target-platform android-arm64
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
