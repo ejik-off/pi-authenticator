@@ -73,6 +73,8 @@ jobs:
         run: flutter pub get
       - name: Generate localization files
         run: flutter gen-l10n
+      - name: Generate launcher icons
+        run: dart run flutter_launcher_icons -f flutter_launcher_icons-netknights.yaml
       - name: Cache Gradle dependencies
         uses: actions/cache@v4
         with:
