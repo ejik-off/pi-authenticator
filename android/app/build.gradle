@@ -92,13 +92,13 @@ android {
 
     productFlavors {
         netknights{
-            dimension "eurasian-authenticator"
+            dimension "pi-authenticator"
             applicationId "eurasianbank.authenticator"
             resValue "string", "app_name", "EurasianBank Authenticator"
             signingConfig signingConfigs.netknights
         }
         netknights_debug{
-            dimension "eurasian-authenticator"
+            dimension "pi-authenticator"
             applicationId "eurasianbank.authenticator.debug"
             resValue "string", "app_name", "Internal - EurasianBank Authenticator"
             signingConfig signingConfigs.netknights_debug
